@@ -26,20 +26,20 @@ export default function GameRoom({ gameId, myId, onLeave }: GameRoomProps) {
 
     return (
       <div className="min-h-screen bg-felt-dark flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-10 text-center max-w-md w-full">
-          <div className="text-6xl mb-4">{iWon ? '🏆' : '🃏'}</div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-10 text-center max-w-md w-full">
+          <div className="text-5xl md:text-6xl mb-3">{iWon ? '🏆' : '🃏'}</div>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
             {iWon ? 'You Won!' : `${winner?.name ?? 'Someone'} Won!`}
           </h2>
-          <p className="text-gray-500 mb-8">
+          <p className="text-gray-500 mb-6 text-sm md:text-base">
             {iWon ? 'You played all your cards first. Well done!' : 'Better luck next time!'}
           </p>
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wide">Final Standings</h3>
+          <div className="mb-6">
+            <h3 className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">Final Standings</h3>
             {[...game.players].sort((a, b) => a.cardCount - b.cardCount).map((p, i) => (
-              <div key={p.id} className={`flex items-center justify-between px-4 py-2 rounded-lg mb-1 ${p.id === game.winner ? 'bg-yellow-50 font-bold' : 'bg-gray-50'}`}>
+              <div key={p.id} className={`flex items-center justify-between px-3 py-2 rounded-lg mb-1 text-sm ${p.id === game.winner ? 'bg-yellow-50 font-bold' : 'bg-gray-50'}`}>
                 <span>#{i + 1} {p.name}{p.id === myId ? ' (you)' : ''}</span>
-                <span className="text-sm text-gray-500">{p.cardCount} cards left</span>
+                <span className="text-gray-500">{p.cardCount} left</span>
               </div>
             ))}
           </div>
@@ -56,31 +56,52 @@ export default function GameRoom({ gameId, myId, onLeave }: GameRoomProps) {
 
   return (
     <div className="min-h-screen bg-felt-dark flex flex-col">
-      <header className="bg-felt-dark border-b border-felt-medium px-4 py-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-white font-bold text-lg">7 Badaam</h1>
-          <p className="text-green-300 text-xs">Room: {gameId}</p>
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-felt-dark border-b border-felt-medium px-3 py-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <h1 className="text-white font-bold text-base leading-tight hidden sm:block">7 Badaam</h1>
+          <span className="text-green-300 text-xs font-mono bg-felt-medium px-2 py-0.5 rounded">
+            {gameId}
+          </span>
         </div>
-        <div className="text-center">
+
+        <div className="flex-1 text-center">
           {currentPlayer && (
-            <div className={`text-sm font-medium ${isMyTurn ? 'text-yellow-300' : 'text-green-300'}`}>
+            <span className={`text-xs md:text-sm font-semibold ${isMyTurn ? 'text-yellow-300' : 'text-green-300'}`}>
               {isMyTurn ? 'Your turn!' : `${currentPlayer.name}'s turn`}
-            </div>
+            </span>
           )}
         </div>
-        <button onClick={onLeave} className="text-gray-400 hover:text-white text-sm transition-colors">
+
+        <button onClick={onLeave} className="text-gray-400 hover:text-white text-sm flex-shrink-0 transition-colors">
           Leave
         </button>
       </header>
 
-      <div className="flex flex-1 gap-4 p-4 overflow-hidden">
-        <div className="flex-1 flex flex-col gap-4 min-w-0">
+      {/* Body — column on mobile, row on desktop */}
+      <div className="flex flex-col md:flex-row flex-1 gap-3 p-3 overflow-y-auto">
+
+        {/* Main column */}
+        <div className="flex flex-col gap-3 flex-1 min-w-0">
           <GameBoard board={game.board} />
+
           {error && (
-            <div className="bg-red-900/50 border border-red-500 text-red-300 px-4 py-2 rounded-lg text-sm">
+            <div className="bg-red-900/50 border border-red-500 text-red-300 px-3 py-2 rounded-lg text-sm">
               {error}
             </div>
           )}
+
+          {/* Player list inline on mobile only */}
+          <div className="md:hidden">
+            <PlayerList
+              players={game.players}
+              currentPlayerIndex={game.currentPlayerIndex}
+              myId={myId}
+              winner={game.winner}
+              compact
+            />
+          </div>
+
           <PlayerHand
             hand={hand}
             board={game.board}
@@ -89,7 +110,9 @@ export default function GameRoom({ gameId, myId, onLeave }: GameRoomProps) {
             onPass={passMove}
           />
         </div>
-        <div className="w-48 flex-shrink-0">
+
+        {/* Sidebar on desktop only */}
+        <div className="hidden md:block w-48 flex-shrink-0">
           <PlayerList
             players={game.players}
             currentPlayerIndex={game.currentPlayerIndex}
